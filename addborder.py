@@ -18,7 +18,7 @@ IMAGE_HEIGHT = math.ceil(A4_HEIGHT / CM_TO_INCH * RESOLUTION)
 def process_image(file):
     path = valid_file(file)
     tiff = Image.open(path)
-
+    width, height = tiff.size
     icc_data = tiff.info.get("icc_profile")
 
     if tiff.mode in ("RGBA", "LA"):
@@ -28,10 +28,16 @@ def process_image(file):
     elif tiff.mode != "RGB":
         tiff = tiff.convert("RGB")
 
-    canvas = Image.new("RGB", (IMAGE_WIDTH, IMAGE_HEIGHT), (255, 255, 255))
+    new_image_width = IMAGE_WIDTH
+    new_image_height = IMAGE_HEIGHT
 
-    border_x = math.ceil((IMAGE_WIDTH - tiff.width) / 2)
-    border_y = math.ceil((IMAGE_HEIGHT - tiff.height) / 2)
+    if height > width:
+        new_image_width, new_image_height = new_image_height, new_image_width
+
+    canvas = Image.new("RGB", (new_image_width, new_image_height), (255, 255, 255))
+
+    border_x = math.ceil((new_image_width - tiff.width) / 2)
+    border_y = math.ceil((new_image_height - tiff.height) / 2)
 
     canvas.paste(tiff, (border_x, border_y))
 
